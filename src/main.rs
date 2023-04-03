@@ -14,8 +14,7 @@ use warp::{http::Response as HttpResponse, Filter, Rejection};
 mod models;
 mod repository;
 
-// define a static variable of db
-
+// define a store for data sources (can be database, cache, etc)
 struct Store {
     db: MongoRepo,
 }
@@ -58,7 +57,7 @@ impl Mutation {
         ctx: &Context<'_>,
         new_todo: TodoInput,
     ) -> FieldResult<Todoql> {
-        // not the best way to initialize db connection
+        // this is to ensure that the db connection is always reused
         let store = ctx.data::<Store>()?;
         let todo = Todo {
             id: None,
@@ -84,7 +83,7 @@ impl Query {
     async fn todos(&self,
         ctx: &Context<'_>,
     ) -> FieldResult<Vec<Todoql>> {
-        // not the best way to initialize db connection
+        // this is to ensure that the db connection is always reused
         let store = ctx.data::<Store>()?;
         let todos = store.db.get_all_todos().await?;
         let todos = todos
